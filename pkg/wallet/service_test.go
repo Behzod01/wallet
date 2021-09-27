@@ -142,7 +142,7 @@ func TestService_FindPaymentByID_success(t *testing.T) {
 	}
 }
 
-func TestService_FindPaymentByID_notfound(t *testing.T) {
+func TestService_FindPaymentByID_fail(t *testing.T) {
 	service := &Service{
 		payments: []*types.Payment{
 			{
@@ -167,11 +167,11 @@ func TestService_FindPaymentByID_notfound(t *testing.T) {
 			},
 		},
 	}
-	expected := ErrAccountNotFound
+	expected := ErrPaymentNotFound
 
-	result, err := service.FindPaymentByID("1111")
+	result, err := service.FindPaymentByID("111")
 
-	if err == nil {
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
