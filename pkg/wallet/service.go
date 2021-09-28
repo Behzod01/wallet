@@ -28,7 +28,7 @@ var ErrNotEnoughBalance = errors.New("not enough balance")
 type Service struct {
 	nextAccountID int64
 	accounts      []*types.Account
-	payments       []*types.Payment
+	payments      []*types.Payment
 }
 
 func (s *Service) RegisterAccount(phone types.Phone) (*types.Account, error) {
@@ -69,10 +69,10 @@ func (s *Service) Deposit(accountID int64, amount types.Money) error {
 	return nil
 }
 
-func (s *Service) Pay(accountID int64, amount types.Money, category types.PaymetCategory)(*types.Payment, error) {
+func (s *Service) Pay(accountID int64, amount types.Money, category types.PaymetCategory) (*types.Payment, error) {
 	if amount <= 0 {
-		return nil,  ErrAmountMustBePositive
-	}	
+		return nil, ErrAmountMustBePositive
+	}
 
 	var account *types.Account
 	for _, acc := range s.accounts {
@@ -90,11 +90,11 @@ func (s *Service) Pay(accountID int64, amount types.Money, category types.Paymet
 	account.Balance -= amount
 	paymentID := uuid.New().String()
 	payment := &types.Payment{
-		ID: paymentID,
+		ID:        paymentID,
 		AccountID: accountID,
-		Amount: amount,
-		Category: category,
-		Status: types.PaymetStatusInProgress,
+		Amount:    amount,
+		Category:  category,
+		Status:    types.PaymetStatusInProgress,
 	}
 	s.payments = append(s.payments, payment)
 	return payment, nil
@@ -116,34 +116,24 @@ func (s *Service) FindAccountByID(accountID int64) (*types.Account, error) {
 }
 
 func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error) {
-	var payment *types.Payment
-
-	for _, p := range s.payments {
-		if p.ID == paymentID {
-			payment = p
-			break
+	for _, payment := range s.payments {
+		if payment.ID == paymentID {
+			return payment, nil
 		}
 	}
-	if payment == nil {
-		return nil, ErrPaymentNotFound
-	}
-	return payment, nil
+	return nil, ErrPaymentNotFound
 }
 
 func (s *Service) Reject(paymentID string) error {
 	payment, err := s.FindPaymentByID(paymentID)
-
-	if payment.ID == paymentID {
-		payment.Status = types.PaymetStatusFail
-	} else if payment.ID == err.Error() {
-		return ErrPaymentNotFound
+	if err != nil {
+		return err
 	}
-
 	account, err := s.FindAccountByID(payment.AccountID)
-
-	if payment.AccountID == account.ID {
-		account.Balance += payment.Amount 		
+	if err != nil {
+		return err
 	}
+	payment.Status = types.PaymetStatusFail
+	account.Balance += payment.Amount
 	return nil
-	
 }
