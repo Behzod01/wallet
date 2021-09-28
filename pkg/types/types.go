@@ -7,13 +7,13 @@ type Money int64
 type PaymetCategory string
 
 //Category  представляет собой статус платежа
-type PaymetStatus string
+type PaymentStatus string
 
 //Предопределлённые статусы платежей
 const (
-	PaymetStatusOk         PaymetStatus = "OK"
-	PaymetStatusFail       PaymetStatus = "FAIL"
-	PaymetStatusInProgress PaymetStatus = "INPROGRESS"
+	PaymentStatusOk         PaymentStatus = "OK"
+	PaymentStatusFail       PaymentStatus = "FAIL"
+	PaymentStatusInProgress PaymentStatus = "INPROGRESS"
 )
 
 //Payment представляет  информацию о платеже
@@ -22,7 +22,7 @@ type Payment struct {
 	AccountID int64
 	Amount    Money
 	Category  PaymetCategory
-	Status    PaymetStatus
+	Status    PaymentStatus
 }
 
 type Phone string

@@ -94,7 +94,7 @@ func (s *Service) Pay(accountID int64, amount types.Money, category types.Paymet
 		AccountID: accountID,
 		Amount:    amount,
 		Category:  category,
-		Status:    types.PaymetStatusInProgress,
+		Status:    types.PaymentStatusInProgress,
 	}
 	s.payments = append(s.payments, payment)
 	return payment, nil
@@ -133,7 +133,7 @@ func (s *Service) Reject(paymentID string) error {
 	if err != nil {
 		return err
 	}
-	payment.Status = types.PaymetStatusFail
+	payment.Status = types.PaymentStatusFail
 	account.Balance += payment.Amount
 	return nil
 }
