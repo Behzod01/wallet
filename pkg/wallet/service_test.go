@@ -11,8 +11,6 @@ import (
 func TestService_FindPaymentByID_success(t *testing.T) {
 	//создаём сервис
 	s := newTestService()
-
-	//регистрируем там пользователя
 	_, payments, err := s.addAccount(defaultTestAccount)
 	if err != nil {
 		t.Error(err)
@@ -23,9 +21,10 @@ func TestService_FindPaymentByID_success(t *testing.T) {
 	payment := payments[0]
 	got, err := s.FindPaymentByID(payment.ID)
 	if err != nil {
-		t.Errorf("Reject(): error = %v", err)
+		t.Errorf("FindPaymentByID(): error=%v", err)
 		return
 	}
+
 	//сравниваем платежи
 	if !reflect.DeepEqual(payment, got) {
 		t.Errorf("FindPaymentByID(): wrong payment returned=%v", err)
@@ -48,15 +47,17 @@ func TestService_FindPaymentByID_fail(t *testing.T) {
 		t.Errorf("FindPaymentByID(): must return error, returned nil")
 		return
 	}
+
+	//сравниваем платежи
 	if err != ErrPaymentNotFound {
 		t.Errorf("FindPaymentByID(): must return ErrPaymentNotFound, returned=%v", err)
 		return
 	}
 }
+
 func TestService_Reject_success(t *testing.T) {
 	//создаём сервис
 	s := newTestService()
-
 	//регистрируем пользователья
 	_, payments, err := s.addAccount(defaultTestAccount)
 	if err != nil {
@@ -92,36 +93,46 @@ func TestService_Reject_success(t *testing.T) {
 		return
 	}
 }
-/*
-func TestService_Reject_fail(t *testing.T) {
+
+func TestService_Reject_notfound(t *testing.T) {
 	//создаём сервис
-	s := Service{}
-
+	s := newTestService()
 	//регистрируем пользователья
-	phone := types.Phone("+992777000777")
-	account, err := s.RegisterAccount(phone)
-
+	_, payments, err := s.addAccount(defaultTestAccount)
 	if err != nil {
-		t.Errorf("Reject(): can not register account, error = %v", err)
-		return
-	}
-	//пополняем его счёт
-	err = s.Deposit(account.ID, 1000_00)
-
-	if err != nil {
-		t.Errorf("Reject(): can not deposit account, error = %v", err)
-		return
-	}
-	//осуществляем платёж на его счёт
-	payment, err := s.Pay(account.ID, 500_00, "phone")
-	if err != nil {
-		t.Errorf("Reject(): can not creat payment, error = %v", err)
+		t.Error(err)
 		return
 	}
 
+	//пробуем отменить платёж
+	payment := payments[0]
 	err = s.Reject(payment.ID)
-	if err == ErrPaymentNotFound {
+	if err != nil {
 		t.Errorf("Reject(): error = %v", err)
 		return
+	}	
+}
+
+func TestService_Repeat_success(t *testing.T) {
+	s := newTestService()
+	_, payments, err := s.addAccount(defaultTestAccount)
+	if err != nil {
+		t.Error(err)
+		return
 	}
-}*/
+	got, err := s.FindPaymentByID(payments[0].ID)
+	if err != nil {
+		t.Errorf("Repeat(): error=%v", err)
+		return
+	}
+	//пробуем повторить платёж
+	payment, err := s.Repeat(payments[0].ID)
+	if err != nil {
+		t.Errorf("Repeat(): can't repeat error=%v", err)
+		return
+	}
+
+	if reflect.DeepEqual(got, payment) {
+		t.Errorf("wrong repeat of payment, error=%v", err)
+	}
+}

@@ -26,6 +26,8 @@ var ErrAmountMustBePositive = errors.New("amount must be greater than zero")
 var ErrPaymentNotFound = errors.New("payment not found")
 var ErrNotEnoughBalance = errors.New("not enough balance")
 
+//var ErrPaymentNotRepeat = errors.New("payment not repeat")
+
 type Service struct {
 	nextAccountID int64
 	accounts      []*types.Account
@@ -133,6 +135,19 @@ func (s *Service) Reject(paymentID string) error {
 	return nil
 }
 
+func (s *Service) Repeat(paymentID string) (*types.Payment, error) {
+	pay, err := s.FindPaymentByID(paymentID)
+	if err != nil {
+		return nil, fmt.Errorf("can't find payment, error=%v", err)
+	}
+	payment, err := s.Pay(pay.AccountID, pay.Amount, pay.Category)
+	if err != nil {
+		return nil, fmt.Errorf("can't create payment again, error=%v", err)
+	}
+
+	return payment, nil
+}
+
 type testService struct {
 	*Service
 }
@@ -140,21 +155,6 @@ type testService struct {
 func newTestService() *testService {
 	return &testService{Service: &Service{}}
 }
-/*
-func (s *testService) addAccountWithBalance(phone types.Phone, balance types.Money) (*types.Account, error) {
-	//регистрируем там пользователя
-	account, err := s.RegisterAccount(phone)
-	if err != nil {
-		return nil, fmt.Errorf("can't register account, error=%v", err)
-	}
-
-	//пополняем его счёт
-	err = s.Deposit(account.ID, balance)
-	if err != nil {
-		return nil, fmt.Errorf("can't deposit account, error=%v", err)
-	}
-	return account, nil
-}*/
 
 type testAccount struct {
 	phone    types.Phone
