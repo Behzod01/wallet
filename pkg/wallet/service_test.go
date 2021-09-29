@@ -1,12 +1,67 @@
 package wallet
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/Behzod01/wallet/pkg/types"
 	"github.com/google/uuid"
 )
+
+type testService struct {
+	*Service
+}
+
+func newTestService() *testService {
+	return &testService{Service: &Service{}}
+}
+
+type testAccount struct {
+	phone    types.Phone
+	balance  types.Money
+	payments []struct {
+		amount   types.Money
+		category types.PaymentCategory
+	}
+}
+
+var defaultTestAccount = testAccount{
+	phone:   "+992000000001",
+	balance: 10_000_00,
+	payments: []struct {
+		amount   types.Money
+		category types.PaymentCategory
+	}{
+		{amount: 1_000_00, category: "auto"},
+	},
+}
+
+func (s *Service) addAccount(data testAccount) (*types.Account, []*types.Payment, error) {
+	//регистрируем там пользователя
+	account, err := s.RegisterAccount(data.phone)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't register account, error=%v", err)
+	}
+
+	//пополняем его счёт
+	err = s.Deposit(account.ID, data.balance)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't deposity account, error=%v", err)
+	}
+
+	//выполняем платежи
+	//можем создать слайс сразу нужной длины, поскольку знаем размер
+	payments := make([]*types.Payment, len(data.payments))
+	for i, payment := range data.payments {
+		//тогда здесь работаем просто через index, а не append
+		payments[i], err = s.Pay(account.ID, payment.amount, payment.category)
+		if err != nil {
+			return nil, nil, fmt.Errorf("can't make payment, error=%v", err)
+		}
+	}
+	return account, payments, nil
+}
 
 func TestService_RegisterAccount_success(t *testing.T) {
 	s := newTestService()
@@ -18,7 +73,7 @@ func TestService_RegisterAccount_success(t *testing.T) {
 	_, err = s.RegisterAccount(phone)
 	expected := ErrPhoneRegistered
 	if !reflect.DeepEqual(expected, err) {
-		t.Errorf("want alredy registered, now:%v",err)
+		t.Errorf("want alredy registered, now:%v", err)
 		return
 	}
 	err = s.Deposit(account.ID, -500)
@@ -154,4 +209,77 @@ func TestService_Repeat_success(t *testing.T) {
 	if reflect.DeepEqual(got, payment) {
 		t.Errorf("wrong repeat of payment, error=%v", err)
 	}
+}
+
+func TestService_FavoritePayment_success(t *testing.T) {
+	s := newTestService()
+	_, payments, err := s.addAccount(defaultTestAccount)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	payment := payments[0]
+	_, err = s.FavoritePayment(payment.ID, "mobile connection")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func TestService_FavoritePayment_fail(t *testing.T) {
+	s := newTestService()
+	_, _, err := s.addAccount(defaultTestAccount)
+	if err != nil {
+		t.Errorf("%v", err)
+		return
+	}
+	payment := uuid.New().String()
+	_, err = s.FavoritePayment(payment, "mobile connection")
+	if err == ErrFavoriteNotFound {
+		t.Errorf("%v", err)
+		return
+	}
+}
+
+func TestService_PayFromFavorite_success(t *testing.T) {
+	s := newTestService()
+	_, payments, err := s.addAccount(defaultTestAccount)
+	if err != nil {
+		t.Errorf("error = %v", err)
+		return
+	}
+
+	payment := payments[0]
+
+	favorite, err := s.FavoritePayment(payment.ID, "mobile connection")
+	if err != nil {
+		t.Errorf("%v", err)
+		return
+	}
+	_, err = s.PayFromFavorite(favorite.ID)
+	if err != nil {
+		t.Error("PayFromFavorite(): must return error, returned nil")
+		return
+	}
+	fmt.Println(payment.ID)
+}
+
+func TestService_PayFromFavorite_fail(t *testing.T) {
+	s := newTestService()
+	_, payments, err := s.addAccount(defaultTestAccount)
+	if err != nil {
+		t.Errorf("error = %v", err)
+		return
+	}
+
+	payment := payments[0]
+
+	favorite := uuid.New().String()
+	_, err = s.PayFromFavorite(favorite)
+	if err == nil {
+		t.Error("PayFromFavorite(): must return error, returned nil")
+		return
+	}
+	fmt.Println(payment.ID)
 }
