@@ -8,6 +8,25 @@ import (
 	"github.com/google/uuid"
 )
 
+func TestService_RegisterAccount_success(t *testing.T) {
+	s := newTestService()
+	account, err := s.RegisterAccount(defaultTestAccount.phone)
+	if err != nil {
+		t.Error(err)
+	}
+	phone := types.Phone("+992000000001")
+	_, err = s.RegisterAccount(phone)
+	expected := ErrPhoneRegistered
+	if !reflect.DeepEqual(expected, err) {
+		t.Errorf("want alredy registered, now:%v",err)
+		return
+	}
+	err = s.Deposit(account.ID, -500)
+	if err == nil {
+		t.Error(err)
+	}
+}
+
 func TestService_FindPaymentByID_success(t *testing.T) {
 	//создаём сервис
 	s := newTestService()
@@ -110,7 +129,7 @@ func TestService_Reject_notfound(t *testing.T) {
 	if err != nil {
 		t.Errorf("Reject(): error = %v", err)
 		return
-	}	
+	}
 }
 
 func TestService_Repeat_success(t *testing.T) {

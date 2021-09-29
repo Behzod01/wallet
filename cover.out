@@ -3,13 +3,13 @@ github.com/Behzod01/wallet/pkg/wallet/service.go:15.29,17.2 1 0
 github.com/Behzod01/wallet/pkg/wallet/service.go:19.38,21.2 1 0
 github.com/Behzod01/wallet/pkg/wallet/service.go:37.78,38.37 1 1
 github.com/Behzod01/wallet/pkg/wallet/service.go:43.2,50.21 4 1
-github.com/Behzod01/wallet/pkg/wallet/service.go:38.37,39.29 1 0
-github.com/Behzod01/wallet/pkg/wallet/service.go:39.29,41.4 1 0
+github.com/Behzod01/wallet/pkg/wallet/service.go:38.37,39.29 1 1
+github.com/Behzod01/wallet/pkg/wallet/service.go:39.29,41.4 1 1
 github.com/Behzod01/wallet/pkg/wallet/service.go:53.70,54.17 1 1
 github.com/Behzod01/wallet/pkg/wallet/service.go:58.2,59.33 2 1
 github.com/Behzod01/wallet/pkg/wallet/service.go:66.2,66.20 1 1
 github.com/Behzod01/wallet/pkg/wallet/service.go:71.2,72.12 2 1
-github.com/Behzod01/wallet/pkg/wallet/service.go:54.17,56.3 1 0
+github.com/Behzod01/wallet/pkg/wallet/service.go:54.17,56.3 1 1
 github.com/Behzod01/wallet/pkg/wallet/service.go:59.33,60.26 1 1
 github.com/Behzod01/wallet/pkg/wallet/service.go:60.26,62.9 2 1
 github.com/Behzod01/wallet/pkg/wallet/service.go:66.20,68.3 1 0
