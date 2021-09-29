@@ -4,7 +4,7 @@ package types
 type Money int64
 
 //Category  представляет собой категорию в которой был совершен платёж
-type PaymetCategory string
+type PaymentCategory string
 
 //Category  представляет собой статус платежа
 type PaymentStatus string
@@ -21,7 +21,7 @@ type Payment struct {
 	ID        string
 	AccountID int64
 	Amount    Money
-	Category  PaymetCategory
+	Category  PaymentCategory
 	Status    PaymentStatus
 }
 
