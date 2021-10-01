@@ -1,18 +1,24 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
+	"log"
 
 	"github.com/Behzod01/wallet/pkg/wallet"
 )
 
 func main() {
 	svc := &wallet.Service{}
+	err := svc.ExportToFile("accounts.txt")
+	if err != nil {
+		log.Print()		
+	}
+	
 /*	vizov obichnoy funksii
 	wallet.RegisterAccount(svc, "+992000000001")
 	vizov metoda
 	svc.RegisterAccount("+992000000001")*/
-	account, err := svc.RegisterAccount("+992000000001")
+	/*account, err := svc.RegisterAccount("+992000000001")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -26,7 +32,7 @@ func main() {
 			fmt.Println("Аккаунт пользователя не найден")			
 		}
 	return
-	}
-	
-	fmt.Println(account.Balance)//10
+	}	
+	fmt.Println(account.Balance)//10*/
+
 }
