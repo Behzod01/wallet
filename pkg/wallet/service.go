@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/Behzod01/wallet/pkg/types"
 	"github.com/google/uuid"
@@ -479,7 +480,7 @@ func (s *Service) Import(dir string) error {
 	}
 	return nil
 }
-
+/*
 func (s *Service) ExportAccountHistory(accountID int64) ([]types.Payment, error) {
 	_, err := s.FindAccountByID(accountID)
 	if err != nil {
@@ -551,3 +552,140 @@ func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records i
 	}
 	return nil
 }
+*/
+func (s *Service) SumPayments(goroutines int) types.Money{
+
+	wg := sync.WaitGroup{}
+	mu:=sync.Mutex{}
+	sum:=types.Money(0)
+
+	if goroutines <2 {
+	wg.Add(1)
+	go func() {
+       
+		defer wg.Done()
+		val:= types.Money(0)
+
+		for _, payment := range s.payments {
+			
+			val+=payment.Amount
+		}
+		mu.Lock()
+		defer mu.Unlock()
+		sum+=val
+
+	}()
+	wg.Wait()
+	 }  else{
+   
+   wg:=sync.WaitGroup{}
+
+   mu:= sync.Mutex{}
+
+   sum:=types.Money(0)
+   
+   kol:= int(len(s.payments)/goroutines) 
+     
+     i:=0
+   for i = 0; i < goroutines-1; i++ {
+
+	wg.Add(1)
+	go func (index int){
+
+		defer wg.Done()
+        val:=types.Money(0)
+	 
+		payments:=s.payments[index*kol : (index+1)*kol]
+
+
+		for _, payment := range payments {
+			
+			val+=payment.Amount
+		}
+		mu.Lock()
+		defer mu.Unlock()
+		sum+=val
+
+	}(i)
+	}
+   
+	wg.Add(1)
+
+	go func (){
+     defer wg.Done()
+	 val:=types.Money(0)
+	 payments:= s.payments[i*kol:]
+	 for _, payments := range payments  {
+        
+		val+=payments.Amount
+	 }
+	 mu.Lock()
+	 defer mu.Unlock()
+	 sum+=val
+
+ 	}()
+ wg.Wait()
+ return sum
+}
+return sum
+}
+/*
+func (s *Service) SumPaymentsWithProgress() <-chan types.Progress {
+	ch := make(chan types.Progress)
+  
+	size := 100_000
+	parts := len(s.payments) / size
+	wg := sync.WaitGroup{}
+  
+	i := 0
+	if parts < 1 {
+	  parts = 1
+	}
+  
+	for i := 0; i < parts; i++ {
+	  wg.Add(1)
+	  var payments []*types.Payment
+	  if len(s.payments) < size {
+		payments = s.payments
+	  } else {
+		payments = s.payments[i*size : (i+1)*size]
+	  }
+	  go func(ch chan types.Progress, data []*types.Payment) {
+		defer wg.Done()
+		val := types.Money(0)
+		for _, v := range data {
+		  val += v.Amount
+		}
+		if len(s.payments) < size {
+		  ch <- types.Progress{
+			Part:   len(data),
+			Result: val,
+		  }
+		}
+  
+	  }(ch, payments)
+	}
+	if len(s.payments) > size {
+	  wg.Add(1)
+	  payments := s.payments[i*size:]
+	  go func(ch chan types.Progress, data []*types.Payment) {
+		defer wg.Done()
+		val := types.Money(0)
+		for _, v := range data {
+		  val += v.Amount
+		}
+		ch <- types.Progress{
+		  Part:   len(data),
+		  Result: val,
+		}
+  
+	  }(ch, payments)
+	}
+  
+	go func() {
+	  defer close(ch)
+	  wg.Wait()
+	}()
+  
+	return ch
+  }*/

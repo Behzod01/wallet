@@ -2,18 +2,18 @@ package main
 
 import (
 	//"fmt"
-	"log"
+	//"log"
 
-	"github.com/Behzod01/wallet/pkg/wallet"
+	//"github.com/Behzod01/wallet/pkg/wallet"
 )
 
 func main() {
-	svc := &wallet.Service{}
-	err := svc.ExportToFile("accounts.txt")
+//	svc := &wallet.Service{}
+/*	err := svc.ExportToFile("accounts.txt")
 	if err != nil {
 		log.Print()		
 	}
-	
+	*/
 /*	vizov obichnoy funksii
 	wallet.RegisterAccount(svc, "+992000000001")
 	vizov metoda

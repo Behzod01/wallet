@@ -36,9 +36,14 @@ type Account struct {
 
 //Favorite представляет информацию о избранное
 type Favorite struct {
-	ID	string
-	AccountID	int64
-	Name	string
-	Amount Money
-	Category PaymentCategory
+	ID        string
+	AccountID int64
+	Name      string
+	Amount    Money
+	Category  PaymentCategory
+}
+
+type Progress struct {
+	Part   int
+	Result Money
 }
